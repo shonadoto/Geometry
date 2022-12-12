@@ -1,0 +1,64 @@
+#include "Triangle.h"
+
+Triangle::Triangle(const Point& point1, const Point& point2,
+                   const Point& point3)
+    : Polygon(point1, point2, point3) {}
+
+bool Triangle::isEqual(const Shape& other) const {
+  if (!isSameType(other)) return false;
+  const Polygon& other_p = dynamic_cast<const Polygon&>(other);
+  if (other_p.verticesCount() != verticesCount()) return false;
+  std::vector<Point> other_points = other_p.getVertices();
+  std::vector<Point> inv = other_p.getVertices();
+  swap(inv[0], inv[1]);
+  size_t size = verticesCount();
+  for (size_t first = 0; first < size; ++first) {
+    bool ok = true, rok = true, inv_ok = true, inv_rok = true;
+    for (size_t second = 0; second < size; ++second) {
+      if (points_[first] != other_points[(first + second) % size]) ok = false;
+      if (points_[first] !=
+          other_points[(2 * size - 1 - first - second) % size])
+        rok = false;
+      if (points_[first] != inv[(first + second) % size]) inv_ok = false;
+      if (points_[first] != inv[(2 * size - 1 - first - second)])
+        inv_rok = false;
+    }
+    if (ok || rok || inv_ok || inv_rok) return true;
+  }
+  return false;
+}
+
+Circle Triangle::circumscribedCircle() const {
+  return Circle(points_[0], points_[1], points_[2]);
+}
+
+Circle Triangle::inscribedCircle() const {
+  double a = points_[1].dist(points_[2]);
+  double b = points_[0].dist(points_[2]);
+  double c = points_[0].dist(points_[1]);
+  Point bisect = (points_[1] * b + points_[2] * c) / (b + c);
+  Point center = (points_[0] * a + bisect * (b + c)) / (a + b + c);
+  return Circle(center, area() * 2 / perimeter());
+}
+
+Point Triangle::centroid() const {
+  Point center = (points_[1] + points_[2]) / 2;
+  return (points_[0] + center * 2) / 3;
+}
+
+Point Triangle::orthocenter() const {
+  Line side1(points_[0], points_[1]);
+  Line norm1(points_[2], points_[2] + side1.normal());
+  Line side2(points_[0], points_[2]);
+  Line norm2(points_[1], points_[1] + side2.normal());
+  return norm1.intersect(norm2);
+}
+
+Line Triangle::EulerLine() const {
+  return Line(circumscribedCircle().center(), orthocenter());
+}
+
+Circle Triangle::ninePointsCircle() const {
+  return Circle((points_[0] + points_[1]) / 2, (points_[0] + points_[2]) / 2,
+                (points_[1] + points_[2]) / 2);
+}
