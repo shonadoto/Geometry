@@ -14,6 +14,11 @@ class Shape {
   virtual void reflect(const Point&) = 0;
   virtual void reflect(const Line&) = 0;
   virtual void scale(const Point&, double koef) = 0;
+  virtual ~Shape() {}
 };
 
-bool operator==(const Shape& lhs, const Shape& rhs) { return lhs.isEqual(rhs); }
+bool operator==(const Shape& lhs, const Shape& rhs) { 
+  return lhs.isEqual(rhs); }
+bool operator!=(const Shape& lhs, const Shape& rhs) {
+  return !(lhs == rhs);
+}

@@ -2,7 +2,7 @@
 
 Ellipse::Ellipse(const Point& focus1, const Point& focus2,
                  double focus_dist_sum)
-    : focus1_(focus1_), focus2_(focus2_), big_axis_(focus_dist_sum) {}
+    : focus1_(focus1), focus2_(focus2), big_axis_(focus_dist_sum) {}
 
 std::pair<Point, Point> Ellipse::focuses() const { return {focus1_, focus2_}; }
 
@@ -86,4 +86,5 @@ void Ellipse::reflect(const Line& line) {
 void Ellipse::scale(const Point& point, double koef) {
   focus1_.scale(point, koef);
   focus2_.scale(point, koef);
+  big_axis_ *= koef;
 }

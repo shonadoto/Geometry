@@ -3,15 +3,13 @@
 Rectangle::Rectangle(const Point& point1, const Point& point2, double relation)
     : Polygon(Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)) {
   points_[0] = point1, points_[2] = point2;
-  Point diagonal = point2 - point1;
-
   if (doubleLess(relation, 1)) relation = 1 / relation;
   double angle = std::atan(relation);
   Point diagonal = point2 - point1;
-  diagonal = diagonal;
-  diagonal.rotate(Point(0, 0), angle);
+  const int degree180 = 180;
+  diagonal.rotate(Point(0, 0), angle * degree180 / M_PIf64);
   points_[1] = point1 + diagonal * std::cos(angle);
-  diagonal.rotate(Point(0, 0), -M_PI_2f64);
+  diagonal.rotate(Point(0, 0), -degree180 / 2);
   points_[3] = point1 + diagonal * std::sin(angle);
 }
 

@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-const int EPS = 1e-10;
+const double EPS = 1e-10;
 
 bool doubleLess(double, double);
 bool doubleEqual(double, double);
@@ -26,6 +26,7 @@ class Point {
   Point operator/(double) const;
   double operator/(const Point&) const;
   bool operator==(const Point&) const;
+  bool operator!=(const Point&) const;
   Point& operator=(const Point&);
   void normalize();
   void rotate(const Point&, double angle);
@@ -41,10 +42,13 @@ class Line {
  public:
   Line(const Point&, const Point&);
   Line(const Point&, double);
+  Line(double, double);
   double dist(const Point&) const;
+  double signedDist(const Point&) const;
   Point normal() const;
   Point intersect(const Line&) const;
   bool isParallel(const Line&) const;
+  bool operator==(const Line&) const;
 };
 
 double dotProduct(const Point&, const Point&);

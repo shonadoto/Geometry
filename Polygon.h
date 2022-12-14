@@ -4,15 +4,16 @@ class Polygon : public Shape {
  protected:
   std::vector<Point> points_;
 
-  void add_points(const Point&);
+  void add_points();
+
   template <typename... Args>
-  void add_points(const Point&, Args...);
+  void add_points(const Point&, const Args&...);
 
  public:
-  template <typename... Args>
-  Polygon(const Point&, const Point&, const Point&, Args...);
-
   Polygon(const std::vector<Point>&);
+
+  template <typename... Args>
+  Polygon(const Point&, const Point&, const Point&, const Args&...);
 
   size_t verticesCount() const;
   std::vector<Point> getVectors() const;
@@ -34,17 +35,17 @@ class Polygon : public Shape {
 };
 
 template <typename... Args>
+void Polygon::add_points(const Point& point, const Args&... tail) {
+  points_.push_back(point);
+  add_points(tail...);
+}
+
+void Polygon::add_points() {}
+
+template <typename... Args>
 Polygon::Polygon(const Point& point1, const Point& point2, const Point& point3,
-                 Args... tail)
+                 const Args&... tail)
     : points_() {
   add_points(point1), add_points(point2), add_points(point3);
   add_points(tail...);
 }
-
-template <typename... Args>
-void Polygon::add_points(const Point& point, Args... tail) {
-  add_points(point);
-  add_points(tail...)
-}
-
-void Polygon::add_points(const Point& point) { points_.push_back(point); }

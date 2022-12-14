@@ -31,7 +31,7 @@ double Polygon::perimeter() const {
   double cur_perimeter = 0;
   size_t size = verticesCount();
   for (size_t i = 0; i < size; ++i) {
-    cur_perimeter = points_[0].dist(points_[(i + 1) % size]);
+    cur_perimeter += points_[i].dist(points_[(i + 1) % size]);
   }
   return cur_perimeter;
 }
@@ -54,15 +54,16 @@ bool Polygon::isSameType(const Shape& other) const {
 bool Polygon::isEqual(const Shape& other) const {
   if (!isSameType(other)) return false;
   const Polygon& other_p = dynamic_cast<const Polygon&>(other);
+
   if (verticesCount() != other_p.verticesCount()) return false;
   size_t size = verticesCount();
   for (size_t first = 0; first < size; ++first) {
     bool ok = true, rok = true;
     for (size_t second = 0; second < size; ++second) {
-      if (points_[first] != other_p.points_[(first + second) % size])
+      if (points_[(first + second) % size] != other_p.points_[second])
         ok = false;
-      if (points_[first] !=
-          other_p.points_[(2 * size - 1 - second - first) % size])
+      if (points_[(first + second) % size] !=
+          other_p.points_[size - 1 - second])
         rok = false;
     }
     if (ok || rok) return true;
@@ -71,25 +72,33 @@ bool Polygon::isEqual(const Shape& other) const {
 }
 
 bool Polygon::isCongruentTo(const Shape& other) const {
-  return isCongruentTo(other) && doubleEqual(area() / other.area(), 1);
+  return isSimilarTo(other) && doubleEqual(area() / other.area(), 1);
 }
 
 bool Polygon::isSimilarTo(const Shape& other) const {
   if (!isSameType(other)) return false;
   const Polygon& other_p = dynamic_cast<const Polygon&>(other);
+
   if (verticesCount() != other_p.verticesCount()) return false;
   double koef = std::sqrt(area() / other.area());
-  std::vector<Point> vec = getVectors(), other_vec = other_p.getVectors(),
-                     m_other_vec = other_p.getVectors();
-
+  std::vector<Point> vec = getVectors(), other_vec = other_p.getVectors();
   size_t size = verticesCount();
   for (size_t i = 0; i < size; ++i) {
     other_vec[i] = other_vec[i] * koef;
-    m_other_vec[i] = -m_other_vec[i] * koef;
   }
 
-  return Polygon(vec) == Polygon(other_vec) ||
-         Polygon(vec) == Polygon(m_other_vec);
+  for (size_t first = 0; first < size; ++first) {
+    bool ok = true, rok = true;
+    for (size_t second = 0; second < size; ++second) {
+      if (vec[(first + second) % size].length() != other_vec[second].length())
+        ok = false;
+      if (vec[(first + second) % size].length() !=
+          other_vec[size - 1 - second].length())
+        ok = false;
+    }
+    if (ok || rok) return true;
+  }
+  return false;
 }
 
 bool Polygon::containsPoint(const Point& point) const {
@@ -97,24 +106,26 @@ bool Polygon::containsPoint(const Point& point) const {
   size_t size = verticesCount();
   for (size_t i = 0; i < size; ++i) {
     angle += std::acos(
-        dotProduct(points_[i] - point, points_[(i + 1) % size] - point));
+        dotProduct(points_[i] - point, points_[(i + 1) % size] - point) /
+        (points_[i] - point).length() /
+        (points_[(i + 1) % size] - point).length());
   }
-  if (doubleEqual(angle, M_PI_2f64 * 2)) return true;
+  if (doubleEqual(angle, M_PIf64 * 2)) return true;
   return false;
 }
 
 void Polygon::rotate(const Point& point, double angle) {
-    for (Point& p : points_) p.rotate(point, angle);
+  for (Point& p : points_) p.rotate(point, angle);
 }
 
 void Polygon::reflect(const Point& point) {
-    for (Point& p : points_) p.reflect(point);
+  for (Point& p : points_) p.reflect(point);
 }
 
 void Polygon::reflect(const Line& line) {
-    for (Point& p : points_) p.reflect(line);
+  for (Point& p : points_) p.reflect(line);
 }
 
 void Polygon::scale(const Point& point, double koef) {
-    for (Point& p : points_) p.scale(point, koef);
+  for (Point& p : points_) p.scale(point, koef);
 }

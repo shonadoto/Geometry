@@ -48,6 +48,8 @@ bool Point::operator==(const Point& other) const {
   return doubleEqual(x, other.x) && doubleEqual(y, other.y);
 }
 
+bool Point::operator!=(const Point& other) const { return !operator==(other); }
+
 Point& Point::operator=(const Point& other) {
   x = other.x, y = other.y;
   return *this;
@@ -68,12 +70,12 @@ void Point::normalize() {
 }
 
 void Point::rotate(const Point& point, double angle) {
-  const int DEG_2_PI = 360;
-  angle /= DEG_2_PI;
+  const int degree180 = 180;
+  angle = angle / degree180* M_PIf64;
   double new_x =
-      std::cos(angle) * (x - point.x) + std::sin(angle) * (y - point.y);
+      std::cos(angle) * (x - point.x) - std::sin(angle) * (y - point.y);
   double new_y =
-      -std::sin(angle) * (x - point.x) + std::cos(angle) * (y - point.y);
+      +std::sin(angle) * (x - point.x) + std::cos(angle) * (y - point.y);
   x = new_x;
   y = new_y;
 }
@@ -83,9 +85,7 @@ void Point::reflect(const Point& point) { *this = point + (point - *this); }
 void Point::reflect(const Line& line) {
   Point norm = line.normal();
   norm.normalize();
-  if (doubleLess(line.dist(*this - norm), line.dist(*this + norm)))
-    norm = -norm;
-  norm = norm * line.dist(*this);
+  norm  = -norm * line.signedDist(*this);
   *this = *this + norm * 2;
 }
 

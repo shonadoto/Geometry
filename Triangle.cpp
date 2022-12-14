@@ -11,16 +11,24 @@ bool Triangle::isEqual(const Shape& other) const {
   std::vector<Point> other_points = other_p.getVertices();
   std::vector<Point> inv = other_p.getVertices();
   swap(inv[0], inv[1]);
+
+  std::cerr << "{ ";
+  for (auto& p : points_) std::cerr << "{" << p.x << ", " << p.y << "},\n";
+  std::cerr << "}\n\n";
+
+  std::cerr << "{ ";
+  for (auto& p : other_points) std::cerr << "{" << p.x << ", " << p.y << "},\n";
+  std::cerr << "}\n\n";
+
   size_t size = verticesCount();
   for (size_t first = 0; first < size; ++first) {
     bool ok = true, rok = true, inv_ok = true, inv_rok = true;
     for (size_t second = 0; second < size; ++second) {
-      if (points_[first] != other_points[(first + second) % size]) ok = false;
-      if (points_[first] !=
-          other_points[(2 * size - 1 - first - second) % size])
+      if (points_[(first + second) % size] != other_points[second]) ok = false;
+      if (points_[(first + second) % size] != other_points[size - 1 - second])
         rok = false;
-      if (points_[first] != inv[(first + second) % size]) inv_ok = false;
-      if (points_[first] != inv[(2 * size - 1 - first - second)])
+      if (points_[(first + second) % size] != inv[second]) inv_ok = false;
+      if (points_[(first + second) % size] != inv[size - 1 - second])
         inv_rok = false;
     }
     if (ok || rok || inv_ok || inv_rok) return true;
@@ -36,9 +44,11 @@ Circle Triangle::inscribedCircle() const {
   double a = points_[1].dist(points_[2]);
   double b = points_[0].dist(points_[2]);
   double c = points_[0].dist(points_[1]);
-  Point bisect = (points_[1] * b + points_[2] * c) / (b + c);
-  Point center = (points_[0] * a + bisect * (b + c)) / (a + b + c);
-  return Circle(center, area() * 2 / perimeter());
+  Point center =
+      (points_[0] * a + points_[1] * b + points_[2] * c) / (a + b + c);
+  double half_per = perimeter() / 2;
+  double radius = std::sqrt((half_per - a) * (half_per - b) * (half_per - c) / half_per);
+  return Circle(center, radius);
 }
 
 Point Triangle::centroid() const {
